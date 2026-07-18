@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="taskmanager.css">
+    <title>Task Manager</title>
+</head>
+<body>
+   <h2>Task Management App</h2>
+   <hr>
+   <input type="text" placeholder="Enter task title" id="taskTitle">
+   <input type="text" placeholder="Briefly describe task" id="taskDesc">
+   <select id="prioritySelect">
+    <option value="Low">Low</option>
+    <option value="Medium">Medium</option>
+    <option value="High">High</option>
+   </select>
+   <button id="addBtn">Add task</button>
+
+   <hr>
+   <h3>Filter and sort quickly through the Task List</h3>
+   <label>Filter By priority</label>
+   <select id="priorityFilter">
+    <option value="ALL">ALL</option>
+    <option value="Low">Low</option>
+    <option value="Medium">Medium</option>
+    <option value="High">High</option>
+   </select>
+   <label>Filter by Alphabetic Order</label>
+   <select id="alphabeticFilter">
+    <option value="ALL">ALL</option>
+    <option value="A-Z">Ascending order</option>
+    <option value="Z-A">Descending Order</option>
+   </select>
+   <label>Filter by Date of creation</label>
+   <select id="dateFilter">
+    <option value="ALL">ALL</option>
+    <option value="ascending"> Most Recent First</option>
+    <option value="descending">Most Recent Last</option>
+   </select>
+   <label>Filter by Active Status</label>
+   <select id="completedStatus">
+    <option value="ALL">ALL</option>
+    <option value="completed">Completed</option>
+    <option value="active">Active</option>
+   </select>
+<input id="titleFilter" placeholder="Search by entering title" type="text">
+   <hr>
+   <ul id="taskList"></ul>
+   <p id="totalTasks"></p>
+   <p id="completedTasks"></p>
+   <p id="remainingTasks"></p>
+   <p id="completionRate"></p>
+
+
+
+
+<script src="taskmanager.js"></script>
+</body>
+</html>
