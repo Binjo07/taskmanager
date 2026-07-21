@@ -3,22 +3,36 @@ const taskDesc = document.getElementById('taskDesc')
 const prioritySelect = document.getElementById('prioritySelect')
 const addBtn = document.getElementById('addBtn')
 const taskList = document.getElementById('taskList')
+    const alphabeticFilter = document.getElementById('alphabeticFilter')
+    const dateFilter = document.getElementById('dateFilter');
+    const completedStatus = document.getElementById('completedStatus')
+    const titleFilter = document.getElementById('titleFilter');
+    const priorityFilter = document.getElementById('priorityFilter')
 
-let tasks = JSON.parse(localStorage.getItem('tasks')) || []
+
+
 let editingId = null; 
 
-
-function addTasks(){
-   const taskInput = taskTitle.value;
+function validateInput(){
+    const taskInput = taskTitle.value.trim()
     const descInput = taskDesc.value.trim();
     const priorityInput = prioritySelect.value
-
+    
     if (!taskInput || descInput.length > 50 || !priorityInput ){
         alert('Please enter all fields correctly')
         return
     }
-    if (editingId === null){
-            tasks.push({
+    return true
+
+}
+
+function buildandAddTaskToArray(){
+     if(!validateInput()) return 
+     const taskInput = taskTitle.value.trim()
+    const descInput = taskDesc.value.trim();
+    const priorityInput = prioritySelect.value
+
+            let task = ({
             id: crypto.randomUUID(),
             title : taskInput,
             desc: descInput,
@@ -26,28 +40,95 @@ function addTasks(){
             completed: false,
             createdAt : Date.now()
         })
-    } else{
-        tasks = tasks.map(task=> task.id === editingId ? {...task, title: taskInput, desc: descInput, priority: priorityInput}: task)
-        editingId === null;
-        
 
+   const isDuplicate = tasks.find(task=> task.title === taskInput)
+   if (isDuplicate){
+    const proceed = confirm(`Task: ${isDuplicate.title} already exists, Add anyway?`)
+    if (proceed){
+        tasks.push(task)
+    } else {
+        return
     }
-    
-    renderUI(tasks)
-    save()
+   } else{
+    tasks.push(task)
+   }
+
+   console.log(task)
 
 }
 
+
+
+function updateExistingTask(id){
+        const taskInput = taskTitle.value.trim()
+    const descInput = taskDesc.value.trim();
+    const priorityInput = prioritySelect.value
+
+    tasks = tasks.map((task)=> {
+        if (task.id === id){
+            return {
+            ...task,
+            title : taskInput,
+            desc: descInput,
+            priority : priorityInput
+        }}
+        return task
+    
+
+    })
+    editingId = null;
+  
+    
+}
+
+
+function addTask() {
+    if (editingId === null){
+        buildandAddTaskToArray()
+    }else{
+        updateExistingTask(editingId)
+        
+
+    }
+
+    save()
+    addBtn.textContent = 'ADD TASK'
+    clearForm()
+   renderUI(tasks)
+}
+
+function clearForm(){
+    taskTitle.value = '';
+    taskDesc.value = ''; 
+}
+
+
 function edit(id){
     const taskToFind = tasks.find(task=> task.id === id)
+    if(!taskToFind) return
     taskTitle.value = taskToFind.title;
     taskDesc.value = taskToFind.desc;
     prioritySelect.value = taskToFind.priority
     editingId = id
     addBtn.textContent = 'SAVE'
     taskTitle.focus()
-    save()
-    renderUI(tasks)
+
+    
+}
+
+function calculateStats (array){
+    const total= array.length
+
+        const completed = array.reduce((acc, curr)=> {
+        return acc + (curr.completed ? 1 : 0)
+    },0)
+       
+
+        const remaining = array.length - completed
+
+        const rate = total === 0 ? 0 : ((completed/total) * 100).toFixed(2)
+
+        return {completed, remaining, total, rate}
 }
 
 function renderUI(array){
@@ -56,16 +137,17 @@ function renderUI(array){
     array.forEach((task)=>{
         const span = document.createElement('span')
         const li = document.createElement('li')
+        li.dataset.taskId = task.id
         span.textContent = `Task : ${task.title} || Description: ${task.desc} || Priority: ${task.priority}`
 
         const deleteBtn = document.createElement('button')
         deleteBtn.textContent = 'DELETE'
-        deleteBtn.addEventListener('click', () => deleteTasks(task.id) )
+    
         
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox'
         checkbox.checked = task.completed
-        checkbox.addEventListener('change', () => completeTasks(task.id))
+
         if(task.completed){
             li.classList.add('completed')
             span.textContent += `|| (✅Task Completed)`
@@ -74,30 +156,20 @@ function renderUI(array){
 
         const editBtn = document.createElement('button');
         editBtn.textContent = 'EDIT';
-        editBtn.addEventListener('click', () => edit(task.id))
 
 
-
-
+        const stats = calculateStats(array)
+        document.getElementById('totalTasks').textContent = `Total Tasks: ${stats.total}`
+        document.getElementById('completedTasks').textContent = `Completed Tasks: ${stats.completed}`
+        document.getElementById('remainingTasks').textContent = `Remaining Tasks: ${stats.remaining}`
+        document.getElementById('completionRate').textContent = `Completion Rate: ${stats.rate}%`
 
         li.append(span, deleteBtn, editBtn, checkbox)
         fragment.append(li)
     })
+        
     taskList.append(fragment)
-    const totalTasks = document.getElementById('totalTasks');
-    totalTasks.innerHTML = `Total tasks: ${tasks.length}`
-
-    const completedTasks = document.getElementById('completedTasks');
-    const completeTasksCounter = tasks.reduce((acc, curr)=> {
-        return acc + (curr.completed ? 1 : 0)
-    },0)
-    completedTasks.textContent = `Completed Tasks: ${completeTasksCounter}`
-
-    const remainingTasks = document.getElementById('remainingTasks');
-    remainingTasks.textContent = `Remaining Tasks : ${tasks.length - completeTasksCounter}`
-
-    const completionRate = document.getElementById('completionRate');
-    completionRate.textContent = `Completion Rate: ${((completeTasksCounter/tasks.length)*100).toFixed(2)}%`
+    
     
 }
 
@@ -113,65 +185,79 @@ function completeTasks(id){
     renderUI(tasks)
 }
 
-function save (){
-    localStorage.setItem('tasks', JSON.stringify(tasks))
-}
-    const alphabeticFilter = document.getElementById('alphabeticFilter')
-    const dateFilter = document.getElementById('dateFilter');
-    const completedStatus = document.getElementById('completedStatus')
-        const titleFilter = document.getElementById('titleFilter');
-function getProcessedData(){
-    let processedTasks = [...tasks]
-    
-    const priorityFilter = document.getElementById('priorityFilter')
-    const priorityFilterInput = priorityFilter.value;
-    if(priorityFilterInput !== 'ALL'){
-        console.log(priorityFilterInput)
-        processedTasks = processedTasks.filter(task=> task.priority === priorityFilterInput)
-    } 
 
 
-    const alphabeticFilterInput = alphabeticFilter.value;
-    if (alphabeticFilterInput === 'A-Z'){
+function applyFiltersAndSort(tasks, {priority, alpha, date, status, title}){
+   let processedTasks = [...tasks]
+
+    if(priority !== 'ALL'){
+        processedTasks = processedTasks.filter(task=> task.priority === priority)
+    }
+
+    if (alpha === 'A-Z'){
         processedTasks = processedTasks.sort((a,b)=>{
             return a.title.localeCompare(b.title)
         })
-    }else if (alphabeticFilterInput === 'Z-A'){
+    }else if (alpha === 'Z-A'){
         processedTasks = processedTasks.sort((a,b)=>{
             return b.title.localeCompare(a.title)
         })
     }
+    
 
-    const dateFilterInput = dateFilter.value;
-    if (dateFilterInput === 'ascending'){
-        processedTasks = processedTasks.sort((a,b)=> {
+    if(date === 'ascending'){
+        processedTasks = processedTasks.sort((a,b)=>{
             return a.createdAt - b.createdAt
         })
-    } else if (dateFilterInput === 'descending'){
+    }else if (date === 'descending'){
         processedTasks = processedTasks.sort((a,b)=>{
             return b.createdAt - a.createdAt
         })
     }
 
-    const completedStatusInput = completedStatus.value;
-    if (completedStatusInput === 'completed'){
-        processedTasks = processedTasks.filter(task => task.completed )
-    } else if (completedStatusInput === 'active'){
-        processedTasks = processedTasks.filter(task => task.completed)
+    if (status === 'completed'){
+        processedTasks = processedTasks.filter(task=> task.completed === true)
+    } else if(status === 'active') {
+        processedTasks = processedTasks.filter(task=> task.completed === false)
+    } 
+
+    if(title){
+        processedTasks = processedTasks.filter(task=> task.title.toLowerCase().includes(title))
     }
 
-    const titleFilterInput = titleFilter.value.trim().toLowerCase();
-
-    if(titleFilterInput){
-        processedTasks = processedTasks.filter(task=> task.title.includes(titleFilterInput.toLowerCase().trim()));
-    }
-
-   
-
-
-    renderUI(processedTasks)
+    return processedTasks 
 }
-addBtn.addEventListener('click', addTasks)
+    
+function getProcessedData(){
+
+    let data = {
+        priority : priorityFilter.value,
+        alpha : alphabeticFilter.value,
+        date : dateFilter.value,
+        status : completedStatus.value,
+        title : titleFilter.value.trim().toLowerCase()
+    }
+
+    const processedData = applyFiltersAndSort(tasks, data)
+
+    renderUI(processedData)
+}
+addBtn.addEventListener('click', addTask)
+taskList.addEventListener('click', (event) => {
+    const li = event.target.closest('li')
+    if (!li) return
+    const taskId = li.dataset.taskId
+    const target = event.target
+    if(target.matches('button')){
+        if(target.textContent === 'DELETE'){
+            deleteTasks(taskId)
+        } else if (target.textContent === 'EDIT'){
+            edit(taskId)
+        }
+    } else if (target.type === 'checkbox'){
+        completeTasks(taskId)
+    }
+})
 renderUI(tasks)
 priorityFilter.addEventListener('change', getProcessedData)
 alphabeticFilter.addEventListener('change', getProcessedData)
