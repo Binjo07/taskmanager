@@ -1,4 +1,4 @@
-import { getTasks, addTasktoStore, updateTaskInStore, deleteTaskFromStore, toggleComplete, isDuplicate, getTasksByTitle
+import { getTasks, addTasktoStore, updateTaskInStore, deleteTaskFromStore, toggleComplete, isDuplicate, getTasksByTitle, saveTasks
  } from "./taskStore.js"
  import { applyFilterAndSort } from "./filterService.js"
  import { renderUI } from "./renderer.js"
@@ -36,7 +36,7 @@ function getProcessedData(){
         title : titleFilter.value.trim().toLowerCase()
     }
 
-    const processedData = applyFiltersAndSort(getTasks(), filters)
+    const processedData = applyFilterAndSort(getTasks(), filters)
 
     renderUI(processedData)
 }
@@ -60,7 +60,7 @@ function addTask() {
     if (!validateInput()) return
     if (editingId === null){
         if (isDuplicate(title)){
-            const existing = getTasks(title)
+            const existing = getTasksByTitle(title)
             if (!confirm(`Task ${existing.title} already exists. Add anyway?`)){
                 return
             }
@@ -72,6 +72,7 @@ function addTask() {
         addBtn.textContent = 'ADD TASK'
         }
         clearForm()
+        saveTasks()
     renderUI(getTasks())
     }
 

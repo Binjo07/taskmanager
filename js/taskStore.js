@@ -40,7 +40,7 @@ export function updateTaskInStore(id, {title, desc, priority}){
     saveTasks()
 }
 export function getTasksByTitle(title){
-    return tasks.find(tasks => task.title.toLowerCase() === title.toLowerCase())
+    return tasks.find(task => task.title.toLowerCase() === title.toLowerCase())
 }
 
 export function deleteTaskFromStore (id){

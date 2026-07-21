@@ -4,7 +4,7 @@ export function calculateStats(array){
     const completed = array.reduce((acc, curr)=>{
        return acc + (curr.completed ? 1 : 0)
     }, 0)
-    console.log(completed)
+   
     const remaining = total - completed
     const rate = ((completed/total)*100).toFixed(2)
 
@@ -39,7 +39,7 @@ export function renderUI (array){
         document.getElementById('totalTasks').textContent = `Total Tasks: ${stats.total}`
         document.getElementById('completedTasks').textContent = `Completed Tasks: ${stats.completed}`
         document.getElementById('remainingTasks').textContent = `Remaining Tasks: ${stats.remaining}`
-        document.getElementById('completionRate').textContent = stats.total === 0 ? 0 : `Completion Rate :${stats.rate}`
+        document.getElementById('completionRate').textContent = stats.total === 0 ? 0 : `Completion Rate :${stats.rate}%`
 
         li.append(span, deleteBtn, editBtn, checkbox)
         fragment.append(li)
